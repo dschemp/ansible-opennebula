@@ -1,0 +1,2 @@
+[nodes]
+node1 ansible_host=X.Y.Z.A ansible_user=USER

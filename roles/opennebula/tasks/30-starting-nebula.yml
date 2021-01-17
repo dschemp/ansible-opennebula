@@ -1,0 +1,23 @@
+---
+- name: Setup first time OpenNebula access
+  copy:
+    content: "oneadmin:{{ opennebula.user_password }}"
+    dest: /var/lib/one/.one/one_auth
+
+- name: Start OpenNebula services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+      - opennebula
+      - opennebula-sunstone
+      - opennebula-gate
+      - opennebula-flow
+
+- name: Inform user
+  debug:
+    msg:
+      - "OpenNebula now available at:"
+      - "* Sunstone: {{ ansible_default_ipv4['address'] }}:9869"
+      - "* VNC proxy: {{ ansible_default_ipv4['address'] }}:29876"
+      

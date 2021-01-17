@@ -1,0 +1,67 @@
+---
+- name: Install OpenNebula runtime packages
+  apt:
+    name:
+      - opennebula # OpenNebula Daemon and Scheduler.
+      - opennebula-tools # Command Line Interface.
+      - opennebula-sunstone # Sunstone (the GUI) and the EC2 API.
+      - opennebula-gate # OneGate server that enables communication between VMs and OpenNebula.
+      - opennebula-flow # OneFlow manages services and elasticity.
+
+- name: Install PostgreSQL environment
+  block:
+    - name: Install packages
+      apt:
+        name:
+          - postgresql
+          - postgresql-contrib
+          - python3-pip
+          - libpq-dev
+          - acl
+
+    - name: Install python packages
+      pip:
+        name: psycopg2
+    
+    - name: Start PostgreSQL service
+      service:
+        name: postgresql
+        state: started
+
+    - block:
+        - name: Generate database "opennebula"
+          community.postgresql.postgresql_db:
+            name: opennebula
+
+        - name: Generate user "oneadmin" for database "opennebula"
+          become: yes
+          become_user: postgres
+          become_method: sudo
+          community.postgresql.postgresql_user:
+            db: opennebula
+            name: oneadmin
+            priv: ALL
+            password: "{{ postgres.user_password }}"
+      become: yes
+      become_user: postgres
+
+    - name: Set database connection in /etc/one/oned.conf
+      replace:
+        path: /etc/one/oned.conf
+        # regexp: 'DB = \[[^\]]*\]' ## error: also matches sample db config
+        regexp: 'DB = \[ BACKEND = "sqlite",\n.*TIMEOUT = 2500 \]'
+        replace: |
+          DB = [ BACKEND = "postgresql",
+                 SERVER  = "localhost",
+                 PORT    = 0,
+                 USER    = "oneadmin",
+                 PASSWD  = "{{ postgres.user_password }}",
+                 DB_NAME = "opennebula" ]
+
+  when: opennebula.install_db == True
+
+- name: Reload PostgreSQL service
+  service:
+    name: postgresql
+    state: reloaded
+    

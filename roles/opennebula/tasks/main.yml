@@ -1,0 +1,6 @@
+---
+- include: 10-repository-config.yml
+
+- include: 20-install-packages.yml
+
+- include: 30-starting-nebula.yml

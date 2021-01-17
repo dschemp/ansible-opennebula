@@ -1,0 +1,13 @@
+---
+- name: Add the ON repository key
+  apt_key:
+    url: https://downloads.opennebula.io/repo/repo.key
+    state: present
+
+- name: Add the ON repository to sources
+  apt_repository:
+    repo: "deb https://downloads.opennebula.io/repo/{{ opennebula.version }}/Ubuntu/{{ ubuntu.release }} stable opennebula"
+    filename: opennebula
+    update_cache: yes
+    state: present
+    

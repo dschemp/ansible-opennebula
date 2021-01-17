@@ -1,0 +1,10 @@
+ubuntu:
+  release: 20.04 # must be 16.04, 18.04 or 20.04
+
+opennebula:
+  version: 5.12 # change to latest release
+  install_db: yes
+  user_password: abc123XYZ
+
+postgres:
+  user_password: yourSUPERsecretPASSWORD
